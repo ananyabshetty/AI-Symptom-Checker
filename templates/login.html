@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot IRIS - Login</title>
+    <style>
+        @media (max-width: 768px) {
+  /* Tablet and Mobile */
+  header, footer {
+    padding: 10px;
+  }
+}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom right, #80deea, #004d6f);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* Ensures the body takes up the full viewport height */
+        }
+
+        header {
+            background: #004d6f;
+            color: white;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-left, .nav-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-left a, .nav-right a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            margin-right: 20px;
+            font-size: 1.1em;
+            transition: color 0.3s;
+        }
+
+        .nav-left a:last-child {
+            margin-right: 0;
+        }
+
+        .nav-left a:hover, .nav-right a:hover {
+            color: #80deea;
+        }
+
+        main {
+            flex: 1; /* Allows main to expand and push footer to the bottom */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .login-page {
+            text-align: center;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1); /* Slightly transparent background */
+            border: 3px solid white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .login-page h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .login-form {
+            width: 300px;
+            margin: auto;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .input-group i {
+            margin-right: 10px;
+            color: black;
+        }
+
+        .input-group input {
+            background: none;
+            border: none;
+            outline: none;
+            color: black;
+            width: 100%;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #004d6f;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            color: white;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background: #80deea;
+        }
+
+        footer {
+            background: #004d6f;
+            color: white;
+            padding: 15px 25px;
+            text-align: left;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        footer p {
+            margin: 0;
+            font-size: 1em;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="nav-left">
+            <a href="index.html">Home</a>
+            <a href="login.html" style="margin-left: 30px;">Login</a>
+        </div>
+
+    </header>
+    <main>
+        <div class="login-page">
+            <h1>Chatbot IRIS</h1>
+            <!-- The action links to chat.html -->
+            <form action="chat.html" method="get" class="login-form">
+                <div class="input-group">
+                    <i class="icon">👤</i>
+                    <input type="text" placeholder="Username..." name="username" required>
+                </div>
+                <div class="input-group">
+                    <i class="icon">🔒</i>
+                    <input type="password" placeholder="Password..." name="password" required>
+                </div>
+                <button class="chat-button" onclick="window.location.href='chat.html'">Login</button>
+
+            </form>
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2024 IRIS. All Rights Reserved.</p>
+    </footer>
+    <script>
+       
+        // Function to send a message to the Flask API and get a response
+        async function sendMessage() {
+           const message = messageInput.value.trim();
+           if (message) {
+               // Add user message to the chat
+               addMessage(message, 'user');
+               
+               // Send the message to the Flask backend
+               try {
+                   const response = await fetch('http://127.0.0.1:5000/chat', {
+   method: 'POST',
+   headers: {
+       'Content-Type': 'application/json',
+   },
+   body: JSON.stringify({ message: message })
+});
+const data = await response.json();
+                   const botResponse = data.reply || 'Error: No response from server';
+                   // Add the bot's reply to the chat window
+                   addMessage(botResponse, 'bot');
+               } catch (error) {
+                   console.error('Error:', error);
+                   addMessage('Sorry, something went wrong.', 'bot');
+               }
+
+               messageInput.value = ''; // Clear the input field
+           }
+       }
+       
+       // Event Listeners
+       sendButton.addEventListener('click', sendMessage);
+       messageInput.addEventListener('keypress', (e) => {
+           if (e.key === 'Enter') {
+               sendMessage();
+           }
+       });
+    </script>
+</body>
+</html>

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot IRIS - Medical Assistant</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        @media (max-width: 768px) {
+  /* Tablet and Mobile */
+  header, footer {
+    padding: 10px;
+  }
+}
+         :root {
+            --primary-color: #0b284f;
+            --secondary-color: #005cd3;
+            --bot-message-color: #0b284f;
+            --user-message-color: #005cd3;
+            --background-gradient: linear-gradient(to bottom right, #95d6f7, #0a7eb8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: var(--background-gradient);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .chat-page {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px 15px;
+            border-radius: 10px;
+        }
+
+        .chatbot-status {
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+        }
+
+        .online {
+            color: #0f0;
+            margin-left: 10px;
+            font-size: 0.7em;
+        }
+
+        .logout {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .logout:hover {
+            background: #040034;
+        }
+
+        .chat-window {
+            flex-grow: 1;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.3) transparent;
+        }
+
+        .chat-window::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-window::-webkit-scrollbar-thumb {
+            background-color: rgba(255,255,255,0.3);
+            border-radius: 3px;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 12px;
+            border-radius: 8px;
+            max-width: 80%;
+            word-wrap: break-word;
+            position: relative;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .bot {
+            background: var(--bot-message-color);
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+        }
+
+        .user {
+            background: var(--user-message-color);
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+        }
+
+        .message-input-container {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 5px 10px;
+        }
+
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            color: rgb(0, 0, 0);
+            outline: none;
+            font-size: 1em;
+        }
+
+        .send-button {
+            background: var(--primary-color);
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: background 0.3s ease;
+        }
+
+        .send-button:hover {
+            background: #040034;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @media (max-width: 768px) {
+            .chat-page {
+                padding: 10px;
+            }
+
+            .message {
+                max-width: 90%;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="chat-page">
+        <div class="chat-header">
+            <span class="chatbot-status">
+                IRIS 
+                <span class="online">● online</span>
+            </span>
+           
+            <form action="index.html" method="get" class="login-form">
+            <button class="logout">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button></form>
+        </div>
+
+        <div class="chat-window" id="chatWindow">
+            <div class="message bot">
+                Hi, I'm IRIS - your AI medical assistant. What symptoms are you experiencing today?
+            </div>
+        </div>
+
+        <div class="message-input-container">
+            <input type="text" id="messageInput" placeholder="Describe your symptoms...">
+            <button class="send-button" id="sendButton">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const chatWindow = document.getElementById('chatWindow');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const logoutButton = document.querySelector('.logout');
+
+        // Function to add messages to the chat window
+        function addMessage(message, type) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', type);
+            messageElement.textContent = message;
+            chatWindow.appendChild(messageElement);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        // Function to send a message to the Flask API and get a response
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (message) {
+                // Add user message to the chat
+                addMessage(message, 'user');
+                
+                // Send the message to the Flask backend
+                try {
+                    const response = await fetch('http://127.0.0.1:5000/chat', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ message: message })
+});
+                    const data = await response.json();
+                    const botResponse = data.reply || 'Error: No response from server';
+                    // Add the bot's reply to the chat window
+                    addMessage(botResponse, 'bot');
+                } catch (error) {
+                    console.error('Error:', error);
+                    addMessage('Sorry, something went wrong.', 'bot');
+                }
+
+                messageInput.value = ''; // Clear the input field
+            }
+        }
+
+        // Event Listeners
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        logoutButton.addEventListener('click', () => {
+            // Implement logout logic
+            window.location.href = 'index.html'; // Redirect to homepage
+        });
+     
+    </script>
+</body>
+</html>

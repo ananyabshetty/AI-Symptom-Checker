@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with IRIS</title>
+    <style>
+@media (max-width: 768px) {
+  /* Tablet and Mobile */
+  header, footer {
+    padding: 10px;
+  }
+}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background: linear-gradient(to bottom right, #e0f7fa, #80deea);
+        }
+
+        header {
+            background: #004d6f;
+            color: white;
+            padding: 15px 25px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-left, .nav-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-left a, .nav-right a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            margin-right: 20px;
+            font-size: 1.1em;
+            transition: color 0.3s;
+        }
+
+        .nav-left a:last-child {
+            margin-right: 0;
+        }
+
+        .nav-left a:hover, .nav-right a:hover {
+            color: #80deea;
+        }
+
+        main {
+            flex: 1;
+            padding: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card {
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(to right, #e3f2fd, #bbdefb);
+            border-radius: 15px;
+            padding: 25px;
+            max-width: 850px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            gap: 20px;
+        }
+
+        .card-text {
+            text-align: center;
+        }
+
+        .card-text h2 {
+            margin-bottom: 20px;
+            color: #004d6f;
+            font-size: 2em;
+        }
+
+        .card-text p {
+            color: #333;
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .chat-button {
+            padding: 10px 20px;
+            font-size: 1em;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(to right, #4fc3f7, #0288d1);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .chat-button:hover {
+            background: linear-gradient(to right, #0288d1, #4fc3f7);
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-image {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card-image img {
+            max-width: 90%;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        footer {
+            background: #004d6f;
+            color: white;
+            padding: 15px 25px;
+            text-align: left;
+            position: sticky;
+            bottom: 0;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        footer p {
+            margin: 0;
+            font-size: 1em;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="nav-left">
+            <a href="index.html">Home</a>
+            <a href="login.html" style="margin-left: 30px;">Login</a>
+        </div>
+
+    </header>
+    <main>
+        <div class="card">
+            <div class="card-text">
+                <h2>Welcome to Chatbot IRIS</h2>
+                <p>
+                    Dive into an innovative experience with Chatbot IRIS. Our AI-powered chatbot 
+                    is here to provide smart solutions and make your tasks effortless. Enjoy the 
+                    seamless blend of technology and simplicity.
+                </p>
+                <!-- Button to Redirect -->
+                <button class="chat-button" onclick="window.location.href='login.html'">Chat Here</button>
+            </div>
+            <div class="card-image">
+                <img src="https://plus.unsplash.com/premium_photo-1681943258709-9137146aa2bf?q=80&w=1984&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" width="250px" height="200px" alt="Chatbot Illustration">
+            </div>
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2024 IRIS. All Rights Reserved.</p>
+    </footer>
+    <script>
+        // Function to send a message to the Flask API and get a response
+        async function sendMessage() {
+           const message = messageInput.value.trim();
+           if (message) {
+               // Add user message to the chat
+               addMessage(message, 'user');
+               
+               // Send the message to the Flask backend
+               try {
+                   const response = await fetch('http://127.0.0.1:5000/chat', {
+   method: 'POST',
+   headers: {
+       'Content-Type': 'application/json',
+   },
+   body: JSON.stringify({ message: message })
+});
+const data = await response.json();
+                   const botResponse = data.reply || 'Error: No response from server';
+                   // Add the bot's reply to the chat window
+                   addMessage(botResponse, 'bot');
+               } catch (error) {
+                   console.error('Error:', error);
+                   addMessage('Sorry, something went wrong.', 'bot');
+               }
+
+               messageInput.value = ''; // Clear the input field
+           }
+       }
+       
+       // Event Listeners
+       sendButton.addEventListener('click', sendMessage);
+       messageInput.addEventListener('keypress', (e) => {
+           if (e.key === 'Enter') {
+               sendMessage();
+           }
+       });
+   </script>
+</body>
+</html>
