@@ -9,7 +9,7 @@ CORS(app)  # Enable CORS for all routes to allow frontend communication
 
 # Configure the Generative AI client
 # IMPORTANT: Replace with your actual API key
-genai.configure(api_key="AIzaSyA3BFfuHwKqWMUVjAhOpNPu1WdyBlpWPQs")
+genai.configure(api_key="Google-gemini-API-key")
 
 # Initialize the chat session model
 model = genai.GenerativeModel("gemini-1.5-flash")
